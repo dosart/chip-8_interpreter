@@ -47,7 +47,7 @@ add_compile_options(
 
 set(PROJECT_INCLUDE_DIR include)
 
-add_executable(${PROJECT_NAME} include/chip8.h)
+add_executable(${PROJECT_NAME})
 set_target_properties(
         ${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 20
@@ -59,7 +59,6 @@ target_sources(
         PRIVATE
         src/main.cpp
         src/chip8.cpp
-
 )
 target_include_directories(
         ${PROJECT_NAME}
