@@ -20,7 +20,7 @@ void initialize(chip8_t *chip8, const std::filesystem::path &filepath) {
   load_program(chip8->memory, program);
 }
 
-void init(chip8_t *chip8) {
+static void init(chip8_t *chip8) {
   chip8->memory.reserve(4096);
   chip8->registers.reserve(16);
   chip8->stack.reserve(16);
