@@ -2,11 +2,11 @@
 #ifndef CHIP_8_INTERPRETER_CHIP8_H
 #define CHIP_8_INTERPRETER_CHIP8_H
 
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <vector>
-#include <cstring>
 
 using bytes_t = std::vector<uint8_t>;
 using words_t = std::vector<uint16_t>;

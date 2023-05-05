@@ -1,6 +1,5 @@
 #include "chip8.h"
 
-
 static const unsigned int FONTSET_START_ADDRESS = 0x50;
 static const unsigned int START_ADDRESS = 0x200;
 
@@ -31,13 +30,13 @@ static void init(chip8_t *chip8) {
 }
 
 static bytes_t read_program(const std::filesystem::path &filepath) {
-  std::ifstream file(filepath.native(), std::ios::binary | std::ios::ate | std::ios::in);
+  std::ifstream file(filepath.native(),
+                     std::ios::binary | std::ios::ate | std::ios::in);
   if (!file.is_open())
     throw std::runtime_error("cannot open input file");
 
-  std::vector<uint8_t> bytes(
-      (std::istreambuf_iterator<char>(file)),
-      (std::istreambuf_iterator<char>()));
+  std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(file)),
+                             (std::istreambuf_iterator<char>()));
 
   file.close();
   return bytes;
