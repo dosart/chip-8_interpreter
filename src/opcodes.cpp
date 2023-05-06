@@ -294,8 +294,7 @@ static void op_Cxkk(chip8_t *chip8) {
   chip8->registers[vx] = random_byte & kk;
 }
 
-static const uint8_t VIDEO_WIDTH = 64;
-static const uint8_t VIDEO_HEIGHT = 32;
+
 /**
  * @ingroup opcodes
  *
@@ -309,8 +308,8 @@ static void op_Dxyn(chip8_t *chip8) {
 
   uint8_t height = chip8->opcode & 0x000F;
 
-  uint8_t x_coord = chip8->registers[vx] % VIDEO_WIDTH;
-  uint8_t y_coord = chip8->registers[vy] % VIDEO_HEIGHT;
+  uint8_t x_coord = chip8->registers[vx] % constants::VIDEO_WIDTH;
+  uint8_t y_coord = chip8->registers[vy] % constants::VIDEO_HEIGHT;
   chip8->registers[vf] = 0;
 
   for (uint8_t row = 0; row < height; ++row) {
@@ -319,7 +318,7 @@ static void op_Dxyn(chip8_t *chip8) {
     for (uint8_t col = 0; col < 8; ++col) {
       uint8_t spritePixel = spriteByte & (0x80u >> col);
       uint32_t *screenPixel =
-          &chip8->video[(y_coord + row) * VIDEO_WIDTH + (x_coord + col)];
+          &chip8->video[(y_coord + row) * constants::VIDEO_WIDTH + (x_coord + col)];
 
       // Sprite pixel is on
       if (spritePixel) {
@@ -434,8 +433,6 @@ static void op_Fx1E(chip8_t *chip8) {
   chip8->index += chip8->registers[vx];
 }
 
-static const unsigned int FONTSET_START_ADDRESS = 0x50;
-
 /**
  * @ingroup opcodes
  *
@@ -445,7 +442,7 @@ static void op_Fx29(chip8_t *chip8) {
   uint16_t vx = make_vx(chip8->opcode);
   uint8_t digit = chip8->registers[vx];
 
-  chip8->index = FONTSET_START_ADDRESS + (5 * digit);
+  chip8->index = constants::FONTSET_START_ADDRESS + (5 * digit);
 }
 
 /**

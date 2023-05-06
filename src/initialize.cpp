@@ -1,7 +1,5 @@
 #include "chip8.h"
 
-static const unsigned int FONTSET_START_ADDRESS = 0x50;
-static const unsigned int START_ADDRESS = 0x200;
 
 static void init(chip8_t *chip8);
 
@@ -26,7 +24,7 @@ static void init(chip8_t *chip8) {
   chip8->keypad.reserve(16);
   chip8->video.reserve(64 * 32);
 
-  chip8->pc = START_ADDRESS;
+  chip8->pc = constants::START_ADDRESS;
 }
 
 static bytes_t read_program(const std::filesystem::path &filepath) {
@@ -61,9 +59,9 @@ static void load_fonts(bytes_t &mem) {
       0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
       0xF0, 0x80, 0xF0, 0x80, 0x80  // F
   };
-  std::memcpy(mem.data() + FONTSET_START_ADDRESS, fonts.data(), fonts.size());
+  std::memcpy(mem.data() + constants::FONTSET_START_ADDRESS, fonts.data(), fonts.size());
 }
 
 static void load_program(bytes_t &mem, const bytes_t &program) {
-  std::memcpy(mem.data() + START_ADDRESS, program.data(), program.size());
+  std::memcpy(mem.data() + constants::START_ADDRESS, program.data(), program.size());
 }

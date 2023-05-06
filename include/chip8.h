@@ -8,6 +8,15 @@
 #include <iterator>
 #include <vector>
 
+namespace constants
+{
+// константы по умолчанию имеют внутреннее связывание
+constexpr unsigned int FONTSET_START_ADDRESS = {0x50};
+constexpr unsigned int  START_ADDRESS { 0x200 };
+constexpr uint8_t VIDEO_WIDTH { 64 };
+constexpr uint8_t VIDEO_HEIGHT { 32 };
+}
+
 using bytes_t = std::vector<uint8_t>;
 using words_t = std::vector<uint16_t>;
 using double_words_t = std::vector<uint32_t>;
