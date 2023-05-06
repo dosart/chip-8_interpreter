@@ -165,7 +165,7 @@ static void op_8xy3(chip8_t *chip8) {
 static void op_8xy4(chip8_t *chip8) {
   uint8_t vx = make_vx(chip8->opcode);
   uint8_t vy = make_vy(chip8->opcode);
-  uint8_t Vf = 0xF;
+  uint8_t vf = 0xF;
 
   uint16_t sum = chip8->registers[vx] + chip8->registers[vy];
   if (sum > 255u)
@@ -273,12 +273,12 @@ static void op_Annn(chip8_t *chip8) {
 /**
  * @ingroup opcodes
  *
- * @brief Jump to location nnn + V0.
+ * @brief Jump to location nnn + v0.
  */
 static void op_Bnnn(chip8_t *chip8) {
   uint16_t nnn = make_nnn(chip8->opcode);
-  uint8_t V0 = 0;
-  chip8->pc = chip8->registers[V0] + nnn;
+  uint8_t v0 = 0;
+  chip8->pc = chip8->registers[v0] + nnn;
 }
 
 /**
@@ -292,4 +292,179 @@ static void op_Cxkk(chip8_t *chip8) {
   uint8_t random_byte = (static_cast<uint8_t>(std::rand() % 256));
 
   chip8->registers[vx] = random_byte & kk;
+}
+
+static const uint8_t VIDEO_WIDTH = 64;
+static const uint8_t VIDEO_HEIGHT = 32;
+/**
+ * @ingroup opcodes
+ *
+ * @brief Display n-byte sprite starting at memory location I at (Vx, Vy), set
+ * VF = collision.
+ */
+static void op_Dxyn(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+  uint8_t vy = make_vy(chip8->opcode);
+  uint8_t vf = 0xF;
+
+  uint8_t height = chip8->opcode & 0x000F;
+
+  uint8_t x_coord = chip8->registers[vx] % VIDEO_WIDTH;
+  uint8_t y_coord = chip8->registers[vy] % VIDEO_HEIGHT;
+  chip8->registers[vf] = 0;
+
+  for (uint8_t row = 0; row < height; ++row) {
+    uint8_t spriteByte = chip8->memory[chip8->index + row];
+
+    for (uint8_t col = 0; col < 8; ++col) {
+      uint8_t spritePixel = spriteByte & (0x80u >> col);
+      uint32_t *screenPixel =
+          &chip8->video[(y_coord + row) * VIDEO_WIDTH + (x_coord + col)];
+
+      // Sprite pixel is on
+      if (spritePixel) {
+        // Screen pixel also on - collision
+        if (*screenPixel == 0xFFFFFFFF)
+          chip8->registers[vf] = 1;
+
+        // Effectively XOR with the sprite pixel
+        *screenPixel ^= 0xFFFFFFFF;
+      }
+    }
+  }
+}
+
+/**
+ * @ingroup opcodes
+ *
+ * @brief Skip next instruction if key with the value of Vx is pressed.
+ */
+static void op_Ex9E(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+  uint8_t key = chip8->registers[vx];
+
+  if (chip8->keypad[key])
+    chip8->pc += 2;
+}
+
+/**
+ * @ingroup opcodes
+ *
+ * @brief Skip next instruction if key with the value of Vx is not pressed.
+ */
+static void op_ExA1(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+  uint8_t key = chip8->registers[vx];
+
+  if (!chip8->keypad[key])
+    chip8->pc += 2;
+}
+
+/**
+ * @ingroup opcodes
+ *
+ * @brief Skip next instruction if key with the value of Vx is not pressed.
+ */
+static void op_Fx07(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+  chip8->registers[vx] = chip8->delay_timer;
+}
+
+/**
+ * @ingroup opcodes
+ *
+ * @brief Wait for a key press, store the value of the key in Vx.
+ */
+static void op_Fx0A(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+
+  if (chip8->keypad[0])
+    chip8->registers[vx] = 0;
+  else if (chip8->keypad[1])
+    chip8->registers[vx] = 1;
+  else if (chip8->keypad[2])
+    chip8->registers[vx] = 2;
+  else if (chip8->keypad[3])
+    chip8->registers[vx] = 3;
+  else if (chip8->keypad[4])
+    chip8->registers[vx] = 4;
+  else if (chip8->keypad[5])
+    chip8->registers[vx] = 5;
+  else if (chip8->keypad[6])
+    chip8->registers[vx] = 6;
+  else if (chip8->keypad[7])
+    chip8->registers[vx] = 7;
+  else if (chip8->keypad[8])
+    chip8->registers[vx] = 8;
+  else if (chip8->keypad[9])
+    chip8->registers[vx] = 9;
+  else if (chip8->keypad[10])
+    chip8->registers[vx] = 10;
+  else if (chip8->keypad[11])
+    chip8->registers[vx] = 11;
+  else if (chip8->keypad[12])
+    chip8->registers[vx] = 12;
+  else if (chip8->keypad[13])
+    chip8->registers[vx] = 13;
+  else if (chip8->keypad[14])
+    chip8->registers[vx] = 14;
+  else if (chip8->keypad[15])
+    chip8->registers[vx] = 15;
+  else
+    chip8->pc -= 2;
+}
+
+/**
+ * @ingroup opcodes
+ *
+ * @brief Set sound timer = Vx.
+ */
+static void op_Fx15(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+  chip8->sound_timer = chip8->registers[vx];
+}
+
+/**
+ * @ingroup opcodes
+ *
+ * @brief Set I = I + Vx.
+ */
+static void op_Fx1E(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+  chip8->index += chip8->registers[vx];
+}
+
+static const unsigned int FONTSET_START_ADDRESS = 0x50;
+
+/**
+ * @ingroup opcodes
+ *
+ * @brief Set I = location of sprite for digit Vx.
+ */
+static void op_Fx29(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+  uint8_t digit = chip8->registers[vx];
+
+  chip8->index = FONTSET_START_ADDRESS + (5 * digit);
+}
+
+/**
+ * @ingroup opcodes
+ *
+ * @brief Store BCD representation of Vx in memory locations I, I+1, and I+2.
+ * The interpreter takes the decimal value of Vx, and places the hundreds digit
+ * in memory at location in I, the tens digit at location I+1, and the ones
+ * digit at location I+2.
+ */
+static void op_Fx33(chip8_t *chip8) {
+  uint16_t vx = make_vx(chip8->opcode);
+  uint8_t value = chip8->registers[vx];
+
+  chip8->memory[chip8->index + 2] = value % 10;
+  value /= 10;
+
+  chip8->memory[chip8->index + 1] = value % 10;
+  value /= 10;
+
+  chip8->memory[chip8->index] = value % 10;
 }
