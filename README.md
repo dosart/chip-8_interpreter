@@ -4,7 +4,8 @@
 
 A Chip-8 emulator written in modern C++.
 
-[Chip-8](https://en.wikipedia.org/wiki/CHIP-8) is a simple, interpreted, programming language which was first used on some do-it-yourself computer systems in the late 1970s and early 1980s.
+[Chip-8](https://en.wikipedia.org/wiki/CHIP-8) is a simple, interpreted, programming language which was first used on some do-it-yourself computer systems in the late 1970s and early 1980s.  
+Our CHIP-8 system is the [Telmac 1800](https://en.wikipedia.org/wiki/Telmac_1800). We’ve got ourselves a pool of 4K of memory, a 64x32 1-bit display, and the ability to beep. The CHIP-8 interpreter itself is implemented via a virtual machine. We keep track of a stack, sixteen 8-bit registers (named V0 through VF), a 12-bit index register (named I), a program counter, two 8-bit timers, and a 16-frame stack.
 
 ## Motivation
 
