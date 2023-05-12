@@ -1,4 +1,17 @@
+#include <random>
 #include "chip8.h"
+
+/*------------------------------------------------------------------------------
+//	Defining interface functions
+//----------------------------------------------------------------------------*/
+
+void run_cycle(chip8_t *chip8);
+
+void init_instructions();
+
+/*------------------------------------------------------------------------------
+//	Implementation of static functions
+//----------------------------------------------------------------------------*/
 
 static inline uint8_t make_vx(uint16_t opcode) {
   return ((opcode & 0x0F00u) >> 8u);
@@ -297,7 +310,10 @@ static void op_Bnnn(chip8_t *chip8) {
 static void op_Cxkk(chip8_t *chip8) {
   uint8_t vx = make_vx(chip8->opcode);
   uint8_t kk = make_kk(chip8->opcode);
-  uint8_t random_byte = (static_cast<uint8_t>(std::rand() % 256));
+
+  std::random_device rd;
+  std::uniform_int_distribution<uint8_t> dist(0, 246);
+  uint8_t random_byte = (dist(rd));
 
   chip8->registers[vx] = random_byte & kk;
 }
@@ -326,9 +342,10 @@ static void op_Dxyn(chip8_t *chip8) {
 
     for (uint8_t col = 0; col < 8; ++col) {
       uint8_t spritePixel = spriteByte & (0x80u >> col);
-      
-      index_t index = static_cast<index_t>((y_coord + row) * constants::VIDEO_WIDTH +(x_coord + col));
-      uint32_t *screenPixel =&chip8->video[index];
+
+      auto index = static_cast<index_t>(
+          (y_coord + row) * constants::VIDEO_WIDTH + (x_coord + col));
+      uint32_t *screenPixel = &chip8->video[index];
 
       // Sprite pixel is on
       if (spritePixel) {
@@ -462,7 +479,8 @@ static void op_Fx29(chip8_t *chip8) {
   uint8_t vx = make_vx(chip8->opcode);
   uint8_t digit = chip8->registers[vx];
 
-  chip8->index = static_cast<uint16_t>(constants::FONTSET_START_ADDRESS + (5 * digit));
+  chip8->index =
+      static_cast<uint16_t>(constants::FONTSET_START_ADDRESS + (5 * digit));
 }
 
 /**
@@ -498,7 +516,7 @@ static void op_Fx65(chip8_t *chip8) {
     chip8->registers[i] = chip8->memory[chip8->index + i];
 }
 
-static void op_null([[maybe_unused]]chip8_t *chip8) {}
+static void op_null([[maybe_unused]] chip8_t *chip8) {}
 
 using func_ptr = void (*)(chip8_t *chip8);
 
@@ -515,6 +533,54 @@ static std::array<func_ptr, 0x66> tableF = {};
 static void opcodesF(chip8_t *chip8) { tableF[chip8->opcode & 0x00FFu]; }
 
 static std::array<func_ptr, 0x10> table = {};
+
+/**
+ * @ingroup table
+ *
+ * @brief Return current instruction.
+ * The address of the current instruction is stored in the pc register.
+ */
+static uint16_t fetch(chip8_t *chip8) {
+        return (static_cast<uint16_t>((chip8->memory[chip8->pc] << 8u) | (chip8->memory[chip8->pc + 1])));
+}
+
+/**
+ * @ingroup table
+ *
+ * @brief Decode and execute current instruction.
+ * The current instruction is stored in the chip8->opcode.
+ */
+static void decode_and_execute(chip8_t *chip8) {
+  auto index = (chip8->opcode & 0xF000u) >> 12u;
+  auto instruction = table[index];
+  instruction(chip8);
+}
+
+/*------------------------------------------------------------------------------
+//	Implementation of interface functions
+//----------------------------------------------------------------------------*/
+
+/**
+ * @ingroup table
+ *
+ * @brief The main loop(fetch, decode and execute instruction).
+ */
+void run_cycle(chip8_t *chip8) {
+  chip8->opcode = fetch(chip8);
+  decode_and_execute(chip8);
+
+  if (chip8->delay_timer > 0)
+    chip8->delay_timer -= 1;
+
+  if (chip8->sound_timer > 0)
+    chip8->sound_timer -= 1;
+}
+
+/**
+ * @ingroup table
+ *
+ * @brief Initialize the instruction table.
+ */
 void init_instructions() {
   table[0x0] = opcodes0;
   table[0x1] = op_1nnn;
