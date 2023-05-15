@@ -66,8 +66,7 @@ target_sources(
         ${PROJECT_NAME}
         PRIVATE
         src/main.cpp
-        src/initialize.cpp
-        src/opcodes.cpp
+        src/chip8.cpp
         src/platform.cpp
 )
 target_include_directories(
