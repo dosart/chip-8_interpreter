@@ -41,6 +41,14 @@ add_compile_options(
 
 ###################################################################################################
 ##
+##      SDL2 link
+##
+###################################################################################################
+
+find_package(SDL2 REQUIRED)
+
+###################################################################################################
+##
 ##      Source files
 ##
 ###################################################################################################
@@ -60,9 +68,13 @@ target_sources(
         src/main.cpp
         src/initialize.cpp
         src/opcodes.cpp
+        src/platform.cpp
 )
 target_include_directories(
         ${PROJECT_NAME}
         PRIVATE
         ${PROJECT_INCLUDE_DIR}
+        ${SDL2_INCLUDE_DIRS}
 )
+
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)

@@ -1,5 +1,6 @@
 #include "chip8.h"
 
+extern void init_instructions();
 
 static void init(chip8_t *chip8);
 
@@ -11,6 +12,7 @@ static void load_program(bytes_t &mem, const bytes_t &program);
 
 void initialize(chip8_t *chip8, const std::filesystem::path &filepath) {
   init(chip8);
+  init_instructions();
   load_fonts(chip8->memory);
 
   auto program = read_program(filepath);

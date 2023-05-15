@@ -567,6 +567,7 @@ static void decode_and_execute(chip8_t *chip8) {
  */
 void run_cycle(chip8_t *chip8) {
   chip8->opcode = fetch(chip8);
+  chip8->pc += 2;
   decode_and_execute(chip8);
 
   if (chip8->delay_timer > 0)

@@ -10,7 +10,6 @@
 
 namespace constants
 {
-// константы по умолчанию имеют внутреннее связывание
 constexpr unsigned int FONTSET_START_ADDRESS = {0x50};
 constexpr unsigned int  START_ADDRESS { 0x200 };
 constexpr uint8_t VIDEO_WIDTH { 64 };
