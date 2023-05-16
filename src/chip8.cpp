@@ -1,49 +1,60 @@
 #include "chip8.h"
 #include <chrono>
-#include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <random>
 
+#include <iostream>
+#include <vector>
+#include <filesystem>
+
+
 
 const unsigned int FONTSET_SIZE = 80;
 const unsigned int FONTSET_START_ADDRESS = 0x50;
-const unsigned int START_ADDRESS = 0x200;
+
+const unsigned int PROGRAM_START_ADDRESS = 0x200;
+
+const unsigned int MAX_MEMORY = 0xFFF;
+const int MAX_ROM_SIZE = MAX_MEMORY - 0x200;
+
+using bytes_t = std::vector<std::byte>;
+using path_t = std::filesystem::path;
+using size_t = std::vector<int>::size_type;
 
 
-uint8_t fontset[FONTSET_SIZE] =
-        {
-                0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-                0x20, 0x60, 0x20, 0x20, 0x70, // 1
-                0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-                0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-                0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-                0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-                0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-                0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-                0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-                0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-                0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-                0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-                0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-                0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-                0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-                0xF0, 0x80, 0xF0, 0x80, 0x80  // F
-        };
+void load_fonset(uint8_t* memory){
+    uint8_t chip8_fontset[FONTSET_SIZE] =
+            {
+                    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+                    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+                    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+                    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+                    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+                    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+                    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+                    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+                    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+                    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+                    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+                    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+                    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+                    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+                    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+                    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+            };
+
+    std::memcpy(memory + FONTSET_START_ADDRESS, chip8_fontset, FONTSET_SIZE);
+}
 
 
 Chip8::Chip8()
         : randGen(static_cast<unsigned long>(std::chrono::system_clock::now().time_since_epoch().count()))
 {
     // Initialize PC
-    pc = START_ADDRESS;
+    pc = PROGRAM_START_ADDRESS;
 
-    // Load fonts into memory
-    for (unsigned int i = 0; i < FONTSET_SIZE; ++i)
-    {
-        memory[FONTSET_START_ADDRESS + i] = fontset[i];
-    }
-
+    load_fonset(memory);
     // Initialize RNG
     randByte = std::uniform_int_distribution<uint8_t>(0, 255U);
 
@@ -104,25 +115,36 @@ Chip8::Chip8()
     tableF[0x65] = &Chip8::OP_Fx65;
 }
 
+bytes_t read_program(path_t filepath)
+{
+    std::ifstream file(filepath, std::ios::out | std::ios::binary);
+    if (!file.is_open())
+        return bytes_t();
+
+    file.seekg(0, std::ios_base::end);
+    auto length = file.tellg();
+    file.seekg(0, std::ios_base::beg);
+
+    bytes_t buffer(static_cast<size_t>(length));
+    file.read(reinterpret_cast<char*>(buffer.data()), length);
+
+    file.close();
+    return buffer;
+}
+
+void load_program(uint8_t* memory, const bytes_t& program){
+    std::memcpy(memory + PROGRAM_START_ADDRESS, program.data(), program.size());
+}
+
 void Chip8::LoadROM(char const* filename)
 {
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
+    auto program = read_program(filename);
+    if(program.size() > MAX_ROM_SIZE)
+        throw std::runtime_error("File size is bigger than max rom size.");
+    else if (program.size() <= 0)
+        throw std::runtime_error("No file or empty file.");
 
-    if (file.is_open())
-    {
-        std::streampos size = file.tellg();
-        char* buffer = new char[size];
-        file.seekg(0, std::ios::beg);
-        file.read(buffer, size);
-        file.close();
-
-        for (long i = 0; i < size; ++i)
-        {
-            memory[START_ADDRESS + i] = static_cast<uint8_t>(buffer[i]);
-        }
-
-        delete[] buffer;
-    }
+    load_program(memory, program);
 }
 
 void Chip8::Cycle()
