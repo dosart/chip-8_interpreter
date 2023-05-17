@@ -224,26 +224,26 @@ void Chip8::OP_00EE()
 
 void Chip8::OP_1nnn()
 {
-    uint16_t address = make_nnn(opcode);
+    uint16_t nnn = make_nnn(opcode);
 
-    pc = address;
+    pc = nnn;
 }
 
 void Chip8::OP_2nnn()
 {
-    uint16_t address = make_nnn(opcode);
+    uint16_t nnn = make_nnn(opcode);
 
     stack[sp] = pc;
     ++sp;
-    pc = address;
+    pc = nnn;
 }
 
 void Chip8::OP_3xkk()
 {
     uint8_t vx = make_vx(opcode);
-    uint8_t byte = make_kk(opcode);
+    uint8_t kk = make_kk(opcode);
 
-    if (registers[vx] == byte)
+    if (registers[vx] == kk)
     {
         pc += 2;
     }
@@ -252,9 +252,9 @@ void Chip8::OP_3xkk()
 void Chip8::OP_4xkk()
 {
     uint8_t vx = make_vx(opcode);
-    uint8_t byte = make_kk(opcode);
+    uint8_t kk = make_kk(opcode);
 
-    if (registers[vx] != byte)
+    if (registers[vx] != kk)
     {
         pc += 2;
     }
@@ -274,17 +274,17 @@ void Chip8::OP_5xy0()
 void Chip8::OP_6xkk()
 {
     uint8_t vx = make_vx(opcode);
-    uint8_t byte = make_kk(opcode);
+    uint8_t kk = make_kk(opcode);
 
-    registers[vx] = byte;
+    registers[vx] = kk;
 }
 
 void Chip8::OP_7xkk()
 {
     uint8_t vx = make_vx(opcode);
-    uint8_t byte = make_kk(opcode);
+    uint8_t kk = make_kk(opcode);
 
-    registers[vx] += byte;
+    registers[vx] += kk;
 }
 
 void Chip8::OP_8xy0()
@@ -405,24 +405,24 @@ void Chip8::OP_9xy0()
 
 void Chip8::OP_Annn()
 {
-    uint16_t address = make_nnn(opcode);
+    uint16_t nnn = make_nnn(opcode);
 
-    index = address;
+    index = nnn;
 }
 
 void Chip8::OP_Bnnn()
 {
-    uint16_t address = make_nnn(opcode);
+    uint16_t nnn = make_nnn(opcode);
 
-    pc = registers[0] + address;
+    pc = registers[0] + nnn;
 }
 
 void Chip8::OP_Cxkk()
 {
     uint8_t vx = make_vx(opcode);
-    uint8_t byte = make_kk(opcode);
+    uint8_t kk = make_kk(opcode);
 
-    registers[vx] = randByte(randGen) & byte;
+    registers[vx] = randByte(randGen) & kk;
 }
 
 void Chip8::OP_Dxyn()
