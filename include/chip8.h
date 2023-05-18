@@ -11,6 +11,24 @@ const unsigned int STACK_LEVELS = 16;
 const unsigned int VIDEO_HEIGHT = 32;
 const unsigned int VIDEO_WIDTH = 64;
 
+struct chip8_t{
+    uint8_t keypad[KEY_COUNT]{};
+    uint32_t video[VIDEO_WIDTH * VIDEO_HEIGHT]{};
+    uint8_t memory[MEMORY_SIZE]{};
+    uint8_t registers[REGISTER_COUNT]{};
+    uint16_t index{};
+    uint16_t pc{};
+    uint8_t delay_timer{};
+    uint8_t sound_timer{};
+    uint16_t stack[STACK_LEVELS]{};
+    uint8_t sp{};
+    uint16_t opcode{};
+
+    std::default_random_engine rand_gen;
+    std::uniform_int_distribution<uint8_t> rand_byte;
+};
+
+
 
 class Chip8
 {
@@ -147,7 +165,7 @@ private:
     std::uniform_int_distribution<uint8_t> randByte;
 
     typedef void (Chip8::*Chip8Func)();
-    Chip8Func table[0xF + 1];
+    Chip8Func dispatch_table[0xF + 1];
     Chip8Func table0[0xE + 1];
     Chip8Func table8[0xE + 1];
     Chip8Func tableE[0xE + 1];

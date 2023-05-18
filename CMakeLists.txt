@@ -55,7 +55,7 @@ find_package(SDL2 REQUIRED)
 
 set(PROJECT_INCLUDE_DIR include)
 
-add_executable(${PROJECT_NAME})
+add_executable(${PROJECT_NAME} src/refactor.cpp)
 set_target_properties(
         ${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 20
