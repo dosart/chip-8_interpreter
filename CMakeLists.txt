@@ -55,7 +55,7 @@ find_package(SDL2 REQUIRED)
 
 set(PROJECT_INCLUDE_DIR include)
 
-add_executable(${PROJECT_NAME} src/refactor.cpp)
+add_executable(${PROJECT_NAME} src/opcodes.cpp)
 set_target_properties(
         ${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 20
@@ -66,6 +66,7 @@ target_sources(
         ${PROJECT_NAME}
         PRIVATE
         src/main.cpp
+        src/opcodes.cpp
         src/chip8.cpp
         src/platform.cpp
 )
