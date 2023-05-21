@@ -18,6 +18,7 @@ static void init(chip8_t *chip8) {
   std::memset(chip8->memory, 0, sizeof(chip8->memory));
   std::memset(chip8->registers, 0, sizeof(chip8->registers));
   std::memset(chip8->stack, 0, sizeof(chip8->stack));
+  std::memset(chip8->keypad, 0, sizeof(chip8->keypad));
 
   chip8->pc = PROGRAM_START_ADDRESS;
   chip8->sp = 0;
@@ -70,16 +71,13 @@ void load_rom(chip8_t *chip8, char const *filename) {
 
 static uint16_t fetch(chip8_t *chip8);
 static void decode_and_execute(chip8_t *chip8);
+static void update_timers(chip8_t *chip8);
 
 void run_cycle(chip8_t *chip8) {
   chip8->opcode = fetch(chip8);
   chip8->pc += 2;
   decode_and_execute(chip8);
-
-  if (chip8->delay_timer > 0)
-    chip8->delay_timer -= 1;
-  if (chip8->sound_timer > 0)
-    chip8->sound_timer -= 1;
+  update_timers(chip8);
 }
 
 static uint16_t fetch(chip8_t *chip8) {
@@ -95,6 +93,14 @@ static void decode_and_execute(chip8_t *chip8) {
   instruction(chip8);
 }
 
+static void update_timers(chip8_t *chip8)
+{
+  if (chip8->delay_timer > 0)
+    chip8->delay_timer -= 1;
+  if (chip8->sound_timer > 0)
+    chip8->sound_timer -= 1;
+}
+
 static bytes_t read_program(const path_t &filepath) {
   std::ifstream file(filepath, std::ios::out | std::ios::binary);
   if (!file.is_open())
@@ -105,10 +111,9 @@ static bytes_t read_program(const path_t &filepath) {
   file.seekg(0, std::ios_base::beg);
 
   bytes_t buffer(static_cast<size_t>(length));
-  file.read(reinterpret_cast<char*>(buffer.data()), length);
-
-    file.close();
-    return buffer;
+  file.read(reinterpret_cast<char *>(buffer.data()), length);
+  file.close();
+  return buffer;
 }
 
 static void load_program(uint8_t *memory, const bytes_t &program) {
