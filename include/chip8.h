@@ -12,8 +12,8 @@ const unsigned int REGISTER_COUNT = 16;
 const unsigned int MEMORY_SIZE = 4096;
 const unsigned int STACK_SIZE = 16;
 
-const unsigned int VIDEO_HEIGHT = 32;
-const unsigned int VIDEO_WIDTH = 64;
+const int VIDEO_HEIGHT = 32;
+const int VIDEO_WIDTH = 64;
 
 const unsigned int FONTSET_SIZE = 80;
 const unsigned int FONTSET_START_ADDRESS = 0x50;
