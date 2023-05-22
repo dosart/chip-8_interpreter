@@ -55,7 +55,7 @@ find_package(SDL2 REQUIRED)
 
 set(PROJECT_INCLUDE_DIR include)
 
-add_executable(${PROJECT_NAME} src/opcodes.cpp)
+add_executable(${PROJECT_NAME})
 set_target_properties(
         ${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 20
@@ -68,7 +68,7 @@ target_sources(
         src/main.cpp
         src/opcodes.cpp
         src/chip8.cpp
-        src/platform.cpp
+        src/viewer.cpp
 )
 target_include_directories(
         ${PROJECT_NAME}

@@ -13,6 +13,7 @@ public:
   void build();
   void update(void const *buffer, int pitch);
   bool process_input(uint8_t *chip8_keypad);
+  void delay(uint32_t);
 
   viewer_t &set_window_title(char const *title);
   viewer_t &set_window_width(int width);

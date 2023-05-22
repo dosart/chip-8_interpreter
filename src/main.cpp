@@ -1,22 +1,15 @@
 #include "chip8.h"
-#include "platform.h"
-#include <chrono>
+#include "viewer.h"
+#include <iostream>
 
-int main() {
-  //    if (argc != 4)
-  //    {
-  //        std::cerr << "Usage: " << argv[0] << " <Scale> <Delay> <ROM>\n";
-  //        std::exit(EXIT_FAILURE);
-  //    }
-  //
-  //    int window_scale = std::stoi(argv[1]);
-  //    int cycleDelay = std::stoi(argv[2]);
-  //    char const* romFilename = argv[3];
+int main(int argc, char *argv[]) {
+  if (argc != 3) {
+    std::cerr << "Usage: " << argv[0] << " <Scale> <ROM>\n";
+    std::exit(EXIT_FAILURE);
+  }
 
-  int window_scale = 10; // std::stoi(argv[1]);
-  int cycleDelay = 1;   // std::stoi(argv[2]);
-  char const *romFilename = "/home/dosart3/code/c++/chip-8_interpreter/"
-                            "cmake-build-debug/Tetris.ch8";
+  int window_scale = std::stoi(argv[1]);
+  char const *romFilename = argv[3];
 
   viewer_t viewer;
   viewer.set_window_title("CHIP-8 Emulator")
@@ -31,25 +24,14 @@ int main() {
   load_rom(chip8.get(), romFilename);
 
   int video_pitch = sizeof(chip8->video[0]) * VIDEO_WIDTH;
-
-  auto lastCycleTime = std::chrono::high_resolution_clock::now();
   bool quit = false;
 
+  uint32_t speed = 3;
   while (!quit) {
     quit = viewer.process_input(chip8->keypad);
-
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(
-                   currentTime - lastCycleTime)
-                   .count();
-
-    if (dt > static_cast<float>(cycleDelay)) {
-      lastCycleTime = currentTime;
-
-      run_cycle(chip8.get());
-
-      viewer.update(chip8->video, video_pitch);
-    }
+    run_cycle(chip8.get());
+    viewer.update(chip8->video, video_pitch);
+    viewer.delay(speed);
   }
 
   return 0;

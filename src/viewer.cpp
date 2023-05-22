@@ -1,4 +1,4 @@
-#include "platform.h"
+#include "viewer.h"
 #include <stdexcept>
 
 void viewer_t::build() {
@@ -230,4 +230,7 @@ viewer_t &viewer_t::set_window_title(const char *title) {
 viewer_t &viewer_t::set_window_scale(int scale) {
   window_scale = scale;
   return *this;
+}
+void viewer_t::delay(uint32_t delay) {
+  SDL_Delay(delay);
 }

@@ -43,8 +43,8 @@ static void load_fonset(uint8_t *memory) {
       0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
       0xF0, 0x10, 0x20, 0x40, 0x40, // 7
       0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-                    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-                    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+      0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+      0xF0, 0x90, 0xF0, 0x90, 0x90, // A
       0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
       0xF0, 0x80, 0x80, 0x80, 0xF0, // C
       0xE0, 0x90, 0x90, 0x90, 0xE0, // D
@@ -93,8 +93,7 @@ static void decode_and_execute(chip8_t *chip8) {
   instruction(chip8);
 }
 
-static void update_timers(chip8_t *chip8)
-{
+static void update_timers(chip8_t *chip8) {
   if (chip8->delay_timer > 0)
     chip8->delay_timer -= 1;
   if (chip8->sound_timer > 0)
@@ -117,5 +116,5 @@ static bytes_t read_program(const path_t &filepath) {
 }
 
 static void load_program(uint8_t *memory, const bytes_t &program) {
-    std::memcpy(memory + PROGRAM_START_ADDRESS, program.data(), program.size());
+  std::memcpy(memory + PROGRAM_START_ADDRESS, program.data(), program.size());
 }

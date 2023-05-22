@@ -214,13 +214,18 @@ struct sprite_t {
 };
 
 static uint32_t *get_video_pixel(chip8_t *chip8, sprite_t *sprite,
-                                    unsigned int row, unsigned int col) {
+                                 unsigned int row, unsigned int col) {
   return &chip8->video[(sprite->sprite_y + row) * VIDEO_WIDTH +
                        (sprite->sprite_x + col)];
 }
 
+static uint8_t get_sprite_pixel(uint8_t sprite_row, uint8_t col) {
+  return sprite_row & (0x80u >> col);
+}
+
+static
+
 void op_Dxyn(chip8_t *chip8) {
-  sprite_t sprite(chip8);
   // reset collision bit
   chip8->registers[0xF] = 0;
 
@@ -230,14 +235,15 @@ void op_Dxyn(chip8_t *chip8) {
    * from memory location I VF is set to 1 if any screen pixels are flipped from
    * set to unset when the sprite is drawn, and to 0 if that doesn’t happen
    * */
+  sprite_t sprite(chip8);
   for (uint8_t row = 0; row < sprite.sprite_height; ++row) {
     uint8_t sprite_row = chip8->memory[chip8->index + row];
     for (uint8_t col = 0; col < 8; ++col) {
-      uint8_t sprite_pixel = sprite_row & (0x80u >> col);
+      uint8_t sprite_pixel  = get_sprite_pixel(sprite_row, col);
       uint32_t *video_pixel = get_video_pixel(chip8, &sprite, row, col);
       // Sprite pixel is on
       if (sprite_pixel) {
-        // Screen pixel also on - collision
+        // Video pixel also on - collision
         if (*video_pixel == 0xFFFFFFFF) {
           chip8->registers[0xF] = 1;
         }
