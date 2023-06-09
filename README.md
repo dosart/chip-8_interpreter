@@ -2,7 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) ![C++ Solution](https://img.shields.io/badge/C++-Solutions-blue.svg?style=flat&logo=c%2B%2B)
 
-A Chip-8 emulator written in modern C++.
+## Introduction
+This is a chip-8 VM built in C++. If you're reading this, chances are that you're thinking of writing your own chip8 emulator. You should! It gives you a great feel for how home computers worked back in the late 70s. It's also a nice project for people new to C++, because you don't need any of the language's more advanced features.
 
 [Chip-8](https://en.wikipedia.org/wiki/CHIP-8) is a simple, interpreted, programming language which was first used on some do-it-yourself computer systems in the late 1970s and early 1980s.  
 Our CHIP-8 system is the [Telmac 1800](https://en.wikipedia.org/wiki/Telmac_1800). We’ve got ourselves a pool of 4K of memory, a 64x32 1-bit display, and the ability to beep. The CHIP-8 interpreter itself is implemented via a virtual machine. We keep track of a stack, sixteen 8-bit registers (named V0 through VF), a 12-bit index register (named I), a program counter, two 8-bit timers, and a 16-frame stack.
